@@ -1,0 +1,2194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroFlex | Premium Brain Training</title>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <!-- UI Libraries -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    :root {
+      --primary: #6c63ff;
+      --primary-dark: #564fcc;
+      --secondary: #ff6584;
+      --dark: #2d3748;
+      --light: #f7fafc;
+      --gray: #a0aec0;
+      --success: #48bb78;
+      --warning: #ed8936;
+      --danger: #f56565;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+      --shadow-xl: 0 20px 25px rgba(0,0,0,0.1);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --game-1: #6c63ff;
+      --game-2: #ff6584;
+      --game-3: #48bb78;
+      --game-4: #ed8936;
+      --game-5: #9c27b0;
+      --game-6: #2196f3;
+      --game-7: #e91e63;
+      --game-8: #4caf50;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: var(--dark);
+      background-color: #f9f9f9;
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Loading Overlay */
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #6c63ff 0%, #ff6584 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .loader {
+      width: 64px;
+      height: 64px;
+      border: 8px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background-color: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+
+    header.scrolled {
+      box-shadow: var(--shadow-md);
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: var(--transition);
+    }
+
+    .logo:hover {
+      transform: scale(1.05);
+    }
+
+    .logo-icon {
+      font-size: 1.5rem;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 30px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--dark);
+      font-weight: 500;
+      position: relative;
+      transition: var(--transition);
+      padding: 5px 0;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background-color: var(--primary);
+      transition: var(--transition);
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .user-avatar:hover {
+      transform: scale(1.1);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--dark);
+      transition: var(--transition);
+    }
+
+    .mobile-menu-btn:hover {
+      color: var(--primary);
+    }
+
+    /* Auth Modal */
+    .auth-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .auth-modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .auth-container {
+      background-color: white;
+      border-radius: 15px;
+      width: 100%;
+      max-width: 500px;
+      overflow: hidden;
+      transform: translateY(20px);
+      transition: var(--transition);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .auth-modal.active .auth-container {
+      transform: translateY(0);
+    }
+
+    .auth-header {
+      padding: 20px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      text-align: center;
+    }
+
+    .auth-tabs {
+      display: flex;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .auth-tab.active {
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .auth-content {
+      padding: 30px;
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-weight: 500;
+    }
+
+    .form-input {
+      padding: 12px 15px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+    }
+
+    .auth-footer {
+      padding: 20px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+    }
+
+    .social-auth {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .google-btn {
+      background-color: #fff;
+      border: 1px solid #e2e8f0;
+      color: #5f6368;
+    }
+
+    .google-btn:hover {
+      background-color: #f9f9f9;
+    }
+
+    .facebook-btn {
+      background-color: #4267B2;
+      color: white;
+    }
+
+    .facebook-btn:hover {
+      background-color: #3b5998;
+    }
+
+    .auth-error {
+      color: var(--danger);
+      font-size: 0.9rem;
+      margin-top: 5px;
+      display: none;
+    }
+
+    /* Hero Section */
+    .hero {
+      height: 100vh;
+      min-height: 700px;
+      background: linear-gradient(135deg, rgba(108, 99, 255, 0.1) 0%, rgba(255, 101, 132, 0.1) 100%);
+      display: flex;
+      align-items: center;
+      padding-top: 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(108, 99, 255, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+      z-index: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      line-height: 1.2;
+      color: var(--dark);
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      color: var(--gray);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 30px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+      gap: 8px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      box-shadow: none;
+    }
+
+    .btn-outline:hover {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-sm {
+      padding: 8px 15px;
+      font-size: 0.9rem;
+    }
+
+    /* Games Section */
+    .games {
+      padding: 100px 0;
+      background-color: white;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 60px;
+      font-size: 2.5rem;
+      font-weight: 700;
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      border-radius: 2px;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 30px;
+    }
+
+    .game-card {
+      background-color: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .game-card:hover {
+      transform: translateY(-10px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .game-number {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      width: 40px;
+      height: 40px;
+      background-color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .game-img-container {
+      height: 200px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .game-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: var(--transition);
+    }
+
+    .game-card:hover .game-img {
+      transform: scale(1.05);
+    }
+
+    .game-info {
+      padding: 20px;
+    }
+
+    .game-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .game-desc {
+      color: var(--gray);
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+    }
+
+    .game-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .game-stat {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.9rem;
+    }
+
+    .game-progress {
+      height: 6px;
+      background-color: #e2e8f0;
+      border-radius: 3px;
+      margin-bottom: 15px;
+      overflow: hidden;
+    }
+
+    .game-progress-bar {
+      height: 100%;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    /* Game Categories */
+    .game-category {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .category-memory { background-color: rgba(108, 99, 255, 0.1); color: var(--game-1); }
+    .category-logic { background-color: rgba(255, 101, 132, 0.1); color: var(--game-2); }
+    .category-math { background-color: rgba(72, 187, 120, 0.1); color: var(--game-3); }
+    .category-visual { background-color: rgba(237, 137, 54, 0.1); color: var(--game-4); }
+    .category-verbal { background-color: rgba(156, 39, 176, 0.1); color: var(--game-5); }
+    .category-speed { background-color: rgba(33, 150, 243, 0.1); color: var(--game-6); }
+    .category-focus { background-color: rgba(233, 30, 99, 0.1); color: var(--game-7); }
+    .category-flexibility { background-color: rgba(76, 175, 80, 0.1); color: var(--game-8); }
+
+    /* Game Modals */
+    .game-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .game-modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .game-container {
+      background-color: white;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow: hidden;
+      position: relative;
+      transform: translateY(20px);
+      transition: var(--transition);
+    }
+
+    .game-modal.active .game-container {
+      transform: translateY(0);
+    }
+
+    .game-header {
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .game-header h3 {
+      font-size: 1.5rem;
+    }
+
+    .game-level {
+      display: flex;
+      gap: 10px;
+    }
+
+    .level-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .level-btn.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .level-btn.locked {
+      background-color: #e2e8f0;
+      color: var(--gray);
+      cursor: not-allowed;
+    }
+
+    .game-content {
+      padding: 30px;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .game-footer {
+      padding: 20px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .game-stats-bar {
+      display: flex;
+      gap: 20px;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .close-game {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--gray);
+      transition: var(--transition);
+      z-index: 1;
+    }
+
+    .close-game:hover {
+      color: var(--dark);
+    }
+
+    /* Game Types */
+    .memory-game {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      width: 100%;
+    }
+
+    .memory-card {
+      aspect-ratio: 1;
+      background-color: var(--primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: white;
+      cursor: pointer;
+      transition: var(--transition);
+      transform-style: preserve-3d;
+      position: relative;
+    }
+
+    .memory-card.flipped {
+      background-color: white;
+      color: var(--dark);
+      transform: rotateY(180deg);
+    }
+
+    .math-game {
+      width: 100%;
+      text-align: center;
+    }
+
+    .math-problem {
+      font-size: 3rem;
+      margin-bottom: 30px;
+    }
+
+    .math-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      width: 100%;
+    }
+
+    .math-option {
+      padding: 15px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .math-option:hover {
+      border-color: var(--primary);
+    }
+
+    /* Dashboard */
+    .dashboard {
+      padding: 100px 0;
+      background: linear-gradient(135deg, #f9f9f9 0%, #f0f4ff 100%);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+
+    .stat-card {
+      background-color: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      color: var(--gray);
+    }
+
+    /* Leaderboard */
+    .leaderboard {
+      background-color: white;
+      padding: 50px 0;
+    }
+
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .leaderboard-table th,
+    .leaderboard-table td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .leaderboard-table th {
+      font-weight: 600;
+      color: var(--gray);
+    }
+
+    .leaderboard-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .leaderboard-table tr:hover {
+      background-color: #f9f9f9;
+    }
+
+    .user-rank {
+      display: inline-block;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      text-align: center;
+      line-height: 25px;
+      font-weight: 600;
+      margin-right: 10px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+      .hero h1 {
+        font-size: 2.8rem;
+      }
+      .section-title {
+        font-size: 2.2rem;
+      }
+      .memory-game {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .nav-links {
+        position: fixed;
+        top: 80px;
+        left: -100%;
+        width: 100%;
+        height: calc(100vh - 80px);
+        background-color: white;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+        transition: var(--transition);
+      }
+
+      .nav-links.active {
+        left: 0;
+      }
+
+      .hero {
+        text-align: center;
+        padding-top: 120px;
+      }
+
+      .hero-content {
+        margin: 0 auto;
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+
+      .btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .btn-outline {
+        margin-left: 0;
+      }
+
+      .memory-game {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .math-options {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .section-title {
+        font-size: 1.8rem;
+      }
+
+      .game-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+      }
+
+      .game-level {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .level-btn {
+        width: 25px;
+        height: 25px;
+        font-size: 0.8rem;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    .delay-1 { animation-delay: 0.2s; }
+    .delay-2 { animation-delay: 0.4s; }
+    .delay-3 { animation-delay: 0.6s; }
+
+    /* Toast Notifications */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--dark);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background-color: var(--success);
+    }
+
+    .toast.error {
+      background-color: var(--danger);
+    }
+
+    /* Dark Mode */
+    .dark-mode {
+      --dark: #f7fafc;
+      --light: #1a202c;
+      background-color: #1a202c;
+      color: white;
+    }
+    .dark-mode header {
+      background-color: rgba(26, 32, 44, 0.98);
+    }
+    .dark-mode .nav-links a,
+    .dark-mode .mobile-menu-btn {
+      color: white;
+    }
+    .dark-mode .game-card,
+    .dark-mode .stat-card,
+    .dark-mode .testimonial-card {
+      background-color: #2d3748;
+      color: white;
+    }
+    .dark-mode .game-title,
+    .dark-mode .game-desc,
+    .dark-mode .stat-value {
+      color: white;
+    }
+    .dark-mode .form-input,
+    .dark-mode .filter-select {
+      background-color: #2d3748;
+      border-color: #4a5568;
+      color: white;
+    }
+    .dark-mode .modal-content {
+      background-color: #2d3748;
+      color: white;
+    }
+    .dark-mode .close-modal {
+      color: #a0aec0;
+    }
+    .dark-mode .close-modal:hover {
+      color: white;
+    }
+
+    /* Dark Mode Toggle */
+    .dark-mode-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Overlay -->
+  <div id="loading-overlay">
+    <div class="loader"></div>
+    <p class="loading-text">Initializing NeuroFlex...</p>
+  </div>
+
+  <!-- Header -->
+  <header id="header">
+    <div class="container">
+      <nav>
+        <a href="#" class="logo">
+          <i class="fas fa-brain logo-icon"></i>
+          NEUROFLEX
+        </a>
+        
+        <ul class="nav-links">
+          <li><a href="#games">Games</a></li>
+          <li><a href="#dashboard">Dashboard</a></li>
+          <li><a href="#leaderboard">Leaderboard</a></li>
+          <li><a href="#about">About</a></li>
+        </ul>
+        
+        <div class="nav-actions">
+          <div id="user-avatar" class="user-avatar" style="display: none;">
+            <i class="fas fa-user"></i>
+          </div>
+          <button id="auth-btn" class="btn btn-sm">Sign In</button>
+          <button class="mobile-menu-btn">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Auth Modal -->
+  <div class="auth-modal" id="auth-modal">
+    <div class="auth-container">
+      <div class="auth-header">
+        <h3>Welcome to NeuroFlex</h3>
+      </div>
+      <div class="auth-tabs">
+        <div class="auth-tab active" data-tab="login">Login</div>
+        <div class="auth-tab" data-tab="register">Register</div>
+      </div>
+      
+      <div class="auth-content active" id="login">
+        <form class="auth-form" id="login-form">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="login-email" placeholder="your@email.com" required>
+            <div class="auth-error" id="login-error"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-input" id="login-password" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn">Login</button>
+          <div class="social-auth">
+            <p>Or login with</p>
+            <button type="button" class="social-btn google-btn" id="google-login">
+              <i class="fab fa-google"></i> Google
+            </button>
+            <button type="button" class="social-btn facebook-btn" id="facebook-login">
+              <i class="fab fa-facebook-f"></i> Facebook
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <div class="auth-content" id="register">
+        <form class="auth-form" id="register-form">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" class="form-input" id="register-name" placeholder="John Doe" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="register-email" placeholder="your@email.com" required>
+            <div class="auth-error" id="register-error"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-input" id="register-password" placeholder="••••••••" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" class="form-input" id="register-confirm" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn">Register</button>
+        </form>
+      </div>
+      
+      <div class="auth-footer">
+        <p>By continuing, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toast-message">Success!</span>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content fade-in">
+        <h1>Unlock Your Brain's Full Potential</h1>
+        <p>Train your cognitive skills with scientifically designed games that adapt to your performance. Progress through 8 difficulty levels and track your improvement.</p>
+        <div class="btn-group">
+          <a href="#games" class="btn">Start Training</a>
+          <a href="#how-it-works" class="btn btn-outline">How It Works</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Games Section -->
+  <section class="games" id="games">
+    <div class="container">
+      <h2 class="section-title">Brain Training Games</h2>
+      <div class="games-grid">
+        <!-- Game 1: Memory Matrix -->
+        <div class="game-card" data-game="memory">
+          <div class="game-number">1</div>
+          <div class="game-img-container">
+            <img src="https://images.unsplash.com/photo-1594904351111-a072f80b1a71" alt="Memory Matrix" class="game-img">
+          </div>
+          <div class="game-info">
+            <span class="game-category category-memory">Memory</span>
+            <h3 class="game-title">Memory Matrix</h3>
+            <p class="game-desc">Remember the pattern of highlighted squares in a grid.</p>
+            <div class="game-progress">
+              <div class="game-progress-bar" style="width: 12.5%"></div>
+            </div>
+            <div class="game-stats">
+              <div class="game-stat">
+                <i class="fas fa-trophy"></i>
+                <span>Level 1/8</span>
+              </div>
+              <div class="game-stat">
+                <i class="fas fa-star"></i>
+                <span>0 ★</span>
+              </div>
+            </div>
+            <button class="btn play-btn" data-game="1">Play Now</button>
+          </div>
+        </div>
+
+        <!-- Game 2: Logic Puzzles -->
+        <div class="game-card" data-game="logic">
+          <div class="game-number">2</div>
+          <div class="game-img-container">
+            <img src="https://images.unsplash.com/photo-1589254065878-42c9da997008" alt="Logic Puzzles" class="game-img">
+          </div>
+          <div class="game-info">
+            <span class="game-category category-logic">Logic</span>
+            <h3 class="game-title">Logic Puzzles</h3>
+            <p class="game-desc">Solve increasingly complex logic problems and riddles.</p>
+            <div class="game-progress">
+              <div class="game-progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="game-stats">
+              <div class="game-stat">
+                <i class="fas fa-trophy"></i>
+                <span>Level 0/8</span>
+              </div>
+              <div class="game-stat">
+                <i class="fas fa-star"></i>
+                <span>0 ★</span>
+              </div>
+            </div>
+            <button class="btn play-btn" data-game="2">Play Now</button>
+          </div>
+        </div>
+
+        <!-- Game 3: Math Blitz -->
+        <div class="game-card" data-game="math">
+          <div class="game-number">3</div>
+          <div class="game-img-container">
+            <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb" alt="Math Blitz" class="game-img">
+          </div>
+          <div class="game-info">
+            <span class="game-category category-math">Math</span>
+            <h3 class="game-title">Math Blitz</h3>
+            <p class="game-desc">Solve math problems as quickly as possible with increasing difficulty.</p>
+            <div class="game-progress">
+              <div class="game-progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="game-stats">
+              <div class="game-stat">
+                <i class="fas fa-trophy"></i>
+                <span>Level 0/8</span>
+              </div>
+              <div class="game-stat">
+                <i class="fas fa-star"></i>
+                <span>0 ★</span>
+              </div>
+            </div>
+            <button class="btn play-btn" data-game="3">Play Now</button>
+          </div>
+        </div>
+
+        <!-- Game 4: Visual Memory -->
+        <div class="game-card" data-game="visual">
+          <div class="game-number">4</div>
+          <div class="game-img-container">
+            <img src="https://images.unsplash.com/photo-1452570053594-1b985d6ea890" alt="Visual Memory" class="game-img">
+          </div>
+          <div class="game-info">
+            <span class="game-category category-visual">Visual</span>
+            <h3 class="game-title">Visual Memory</h3>
+            <p class="game-desc">Remember and recreate complex visual patterns.</p>
+            <div class="game-progress">
+              <div class="game-progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="game-stats">
+              <div class="game-stat">
+                <i class="fas fa-trophy"></i>
+                <span>Level 0/8</span>
+              </div>
+              <div class="game-stat">
+                <i class="fas fa-star"></i>
+                <span>0 ★</span>
+              </div>
+            </div>
+            <button class="btn play-btn" data-game="4">Play Now</button>
+          </div>
+        </div>
+
+        <!-- Game 5: Word Wizard -->
+        <div class="game-card" data-game="verbal">
+          <div class="game-number">5</div>
+          <div class="game-img-container">
+            <img src="https://images.unsplash.com/photo-1506880018603-83d5b814b5a6" alt="Word Wizard" class="game-img">
+          </div>
+          <div class="game-info">
+            <span class="game-category category-verbal">Verbal</span>
+            <h3 class="game-title">Word Wizard</h3>
+            <p class="game-desc">Find words, solve anagrams, and complete verbal challenges.</p>
+            <div class="game-progress">
+              <div class="game-progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="game-stats">
+              <div class="game-stat">
+                <i class="fas fa-trophy"></i>
+                <span>Level 0/8</span>
+              </div>
+              <div class="game-stat">
+                <i class="fas fa-star"></i>
+                <span>0 ★</span>
+              </div>
+            </div>
+            <button class="btn play-btn" data-game="5">Play Now</button>
+          </div>
+        </div>
+
+        <!-- Game 6: Speed Match -->
+        <div class="game-card" data-game="speed">
+          <div class="game-number">6</div>
+          <div class="game-img-container">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71" alt="Speed Match" class="game-img">
+          </div>
+          <div class="game-info">
+            <span class="game-category category-speed">Speed</span>
+            <h3 class="game-title">Speed Match</h3>
+            <p class="game-desc">Quickly determine if the current symbol matches the previous one.</p>
+            <div class="game-progress">
+              <div class="game-progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="game-stats">
+              <div class="game-stat">
+                <i class="fas fa-trophy"></i>
+                <span>Level 0/8</span>
+              </div>
+              <div class="game-stat">
+                <i class="fas fa-star"></i>
+                <span>0 ★</span>
+              </div>
+            </div>
+            <button class="btn play-btn" data-game="6">Play Now</button>
+          </div>
+        </div>
+
+        <!-- Game 7: Focus Pocus -->
+        <div class="game-card" data-game="focus">
+          <div class="game-number">7</div>
+          <div class="game-img-container">
+            <img src="https://images.unsplash.com/photo-1596638787647-904d822d751e" alt="Focus Pocus" class="game-img">
+          </div>
+          <div class="game-info">
+            <span class="game-category category-focus">Focus</span>
+            <h3 class="game-title">Focus Pocus</h3>
+            <p class="game-desc">Maintain focus amid distractions with this attention training game.</p>
+            <div class="game-progress">
+              <div class="game-progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="game-stats">
+              <div class="game-stat">
+                <i class="fas fa-trophy"></i>
+                <span>Level 0/8</span>
+              </div>
+              <div class="game-stat">
+                <i class="fas fa-star"></i>
+                <span>0 ★</span>
+              </div>
+            </div>
+            <button class="btn play-btn" data-game="7">Play Now</button>
+          </div>
+        </div>
+
+        <!-- Game 8: Cognitive Flexibility -->
+        <div class="game-card" data-game="flexibility">
+          <div class="game-number">8</div>
+          <div class="game-img-container">
+            <img src="https://images.unsplash.com/photo-1517842645767-c639042777db" alt="Cognitive Flexibility" class="game-img">
+          </div>
+          <div class="game-info">
+            <span class="game-category category-flexibility">Flexibility</span>
+            <h3 class="game-title">Cognitive Flexibility</h3>
+            <p class="game-desc">Switch between different tasks and rules quickly and accurately.</p>
+            <div class="game-progress">
+              <div class="game-progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="game-stats">
+              <div class="game-stat">
+                <i class="fas fa-trophy"></i>
+                <span>Level 0/8</span>
+              </div>
+              <div class="game-stat">
+                <i class="fas fa-star"></i>
+                <span>0 ★</span>
+              </div>
+            </div>
+            <button class="btn play-btn" data-game="8">Play Now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard Section -->
+  <section class="dashboard" id="dashboard">
+    <div class="container">
+      <h2 class="section-title">Your Brain Training Dashboard</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">8</div>
+          <div class="stat-label">Games Available</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">1</div>
+          <div class="stat-label">Games Completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">12.5%</div>
+          <div class="stat-label">Total Progress</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">0 ★</div>
+          <div class="stat-label">Average Rating</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Leaderboard Section -->
+  <section class="leaderboard" id="leaderboard">
+    <div class="container">
+      <h2 class="section-title">Global Leaderboard</h2>
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>Games Completed</th>
+            <th>Total Score</th>
+            <th>Level</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="user-rank">1</span></td>
+            <td>BrainMaster99</td>
+            <td>64</td>
+            <td>512 ★</td>
+            <td>8</td>
+          </tr>
+          <tr>
+            <td><span class="user-rank">2</span></td>
+            <td>NeuroNinja</td>
+            <td>56</td>
+            <td>448 ★</td>
+            <td>7</td>
+          </tr>
+          <tr>
+            <td><span class="user-rank">3</span></td>
+            <td>MindMover</td>
+            <td>48</td>
+            <td>384 ★</td>
+            <td>7</td>
+          </tr>
+          <tr>
+            <td><span class="user-rank">4</span></td>
+            <td>CogniQueen</td>
+            <td>40</td>
+            <td>320 ★</td>
+            <td>6</td>
+          </tr>
+          <tr>
+            <td><span class="user-rank">5</span></td>
+            <td>SynapseSurfer</td>
+            <td>32</td>
+            <td>256 ★</td>
+            <td>5</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Game Modals -->
+  <div class="game-modal" id="memory-game-modal">
+    <div class="game-container">
+      <span class="close-game">&times;</span>
+      <div class="game-header">
+        <h3>Memory Matrix</h3>
+        <div class="game-level">
+          <div class="level-btn active">1</div>
+          <div class="level-btn locked">2</div>
+          <div class="level-btn locked">3</div>
+          <div class="level-btn locked">4</div>
+          <div class="level-btn locked">5</div>
+          <div class="level-btn locked">6</div>
+          <div class="level-btn locked">7</div>
+          <div class="level-btn locked">8</div>
+        </div>
+      </div>
+      <div class="game-content">
+        <div class="memory-game">
+          <!-- Memory cards will be generated here by JavaScript -->
+        </div>
+      </div>
+      <div class="game-footer">
+        <div class="game-stats-bar">
+          <div class="stat-item">
+            <i class="fas fa-clock"></i>
+            <span>Time: 30s</span>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-star"></i>
+            <span>Score: 0</span>
+          </div>
+        </div>
+        <button class="btn next-level-btn" disabled>Complete Level 1 to Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="game-modal" id="math-game-modal">
+    <div class="game-container">
+      <span class="close-game">&times;</span>
+      <div class="game-header">
+        <h3>Math Blitz</h3>
+        <div class="game-level">
+          <div class="level-btn">1</div>
+          <div class="level-btn locked">2</div>
+          <div class="level-btn locked">3</div>
+          <div class="level-btn locked">4</div>
+          <div class="level-btn locked">5</div>
+          <div class="level-btn locked">6</div>
+          <div class="level-btn locked">7</div>
+          <div class="level-btn locked">8</div>
+        </div>
+      </div>
+      <div class="game-content">
+        <div class="math-game">
+          <div class="math-problem">5 + 7 = ?</div>
+          <div class="math-options">
+            <div class="math-option">11</div>
+            <div class="math-option">12</div>
+            <div class="math-option">13</div>
+            <div class="math-option">14</div>
+          </div>
+        </div>
+      </div>
+      <div class="game-footer">
+        <div class="game-stats-bar">
+          <div class="stat-item">
+            <i class="fas fa-clock"></i>
+            <span>Time: 10s</span>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-star"></i>
+            <span>Score: 0</span>
+          </div>
+        </div>
+        <button class="btn next-level-btn" disabled>Complete Level 1 to Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- [Other game modals would follow the same pattern] -->
+
+  <!-- Dark Mode Toggle -->
+  <button class="dark-mode-toggle" id="dark-mode-toggle">
+    <i class="fas fa-moon"></i>
+  </button>
+
+  <script>
+    // ======================
+    // Firebase Configuration
+    // ======================
+    const firebaseConfig = {
+      apiKey: "AIzaSyCmdFI2qrvO2tuHHifO1jWn8C96uqjjUts",
+      authDomain: "neuroflux-92147.firebaseapp.com",
+      projectId: "neuroflux-92147",
+      storageBucket: "neuroflux-92147.firebasestorage.app",
+      messagingSenderId: "323926593835",
+      appId: "1:323926593835:web:d3b9d160c9fd9f8d96b56e"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // ======================
+    // Global Variables
+    // ======================
+    let currentUser = null;
+    let currentGame = null;
+    let currentLevel = 1;
+    let gameScore = 0;
+    let gameTime = 0;
+    let timerInterval = null;
+    let games = [
+      {
+        id: 1,
+        name: "Memory Matrix",
+        category: "memory",
+        description: "Remember the pattern of highlighted squares in a grid.",
+        levels: 8,
+        currentLevel: 1,
+        completed: false,
+        scores: []
+      },
+      {
+        id: 2,
+        name: "Logic Puzzles",
+        category: "logic",
+        description: "Solve increasingly complex logic problems and riddles.",
+        levels: 8,
+        currentLevel: 0,
+        completed: false,
+        scores: []
+      },
+      {
+        id: 3,
+        name: "Math Blitz",
+        category: "math",
+        description: "Solve math problems as quickly as possible with increasing difficulty.",
+        levels: 8,
+        currentLevel: 0,
+        completed: false,
+        scores: []
+      },
+      {
+        id: 4,
+        name: "Visual Memory",
+        category: "visual",
+        description: "Remember and recreate complex visual patterns.",
+        levels: 8,
+        currentLevel: 0,
+        completed: false,
+        scores: []
+      },
+      {
+        id: 5,
+        name: "Word Wizard",
+        category: "verbal",
+        description: "Find words, solve anagrams, and complete verbal challenges.",
+        levels: 8,
+        currentLevel: 0,
+        completed: false,
+        scores: []
+      },
+      {
+        id: 6,
+        name: "Speed Match",
+        category: "speed",
+        description: "Quickly determine if the current symbol matches the previous one.",
+        levels: 8,
+        currentLevel: 0,
+        completed: false,
+        scores: []
+      },
+      {
+        id: 7,
+        name: "Focus Pocus",
+        category: "focus",
+        description: "Maintain focus amid distractions with this attention training game.",
+        levels: 8,
+        currentLevel: 0,
+        completed: false,
+        scores: []
+      },
+      {
+        id: 8,
+        name: "Cognitive Flexibility",
+        category: "flexibility",
+        description: "Switch between different tasks and rules quickly and accurately.",
+        levels: 8,
+        currentLevel: 0,
+        completed: false,
+        scores: []
+      }
+    ];
+
+    // ======================
+    // DOM Elements
+    // ======================
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const authModal = document.getElementById('auth-modal');
+    const authBtn = document.getElementById('auth-btn');
+    const userAvatar = document.getElementById('user-avatar');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const googleLoginBtn = document.getElementById('google-login');
+    const facebookLoginBtn = document.getElementById('facebook-login');
+    const authTabs = document.querySelectorAll('.auth-tab');
+    const authContents = document.querySelectorAll('.auth-content');
+    const playButtons = document.querySelectorAll('.play-btn');
+    const gameModals = document.querySelectorAll('.game-modal');
+    const closeGameButtons = document.querySelectorAll('.close-game');
+    const levelButtons = document.querySelectorAll('.level-btn');
+    const nextLevelButtons = document.querySelectorAll('.next-level-btn');
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navLinks = document.querySelector('.nav-links');
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+
+    // ======================
+    // Helper Functions
+    // ======================
+    function showToast(message, type = 'success') {
+      toastMessage.textContent = message;
+      toast.className = `toast ${type}`;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function startTimer(seconds) {
+      clearInterval(timerInterval);
+      gameTime = seconds;
+      updateTimerDisplay();
+      
+      timerInterval = setInterval(() => {
+        gameTime--;
+        updateTimerDisplay();
+        
+        if (gameTime <= 0) {
+          clearInterval(timerInterval);
+          endGame(false);
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const timerElements = document.querySelectorAll('.stat-item i.fa-clock + span');
+      timerElements.forEach(timer => {
+        timer.textContent = `Time: ${gameTime}s`;
+      });
+    }
+
+    function updateScoreDisplay(points) {
+      gameScore += points;
+      const scoreElements = document.querySelectorAll('.stat-item i.fa-star + span');
+      scoreElements.forEach(score => {
+        score.textContent = `Score: ${gameScore}`;
+      });
+    }
+
+    // ======================
+    // Game Functions
+    // ======================
+    function initMemoryGame(level) {
+      try {
+        const memoryGame = document.querySelector('.memory-game');
+        memoryGame.innerHTML = '';
+        
+        const gridSize = 2 + Math.floor(level / 2);
+        const cardCount = gridSize * gridSize;
+        const pairs = cardCount / 2;
+        
+        let cards = [];
+        for (let i = 0; i < pairs; i++) {
+          cards.push(i);
+          cards.push(i);
+        }
+        
+        cards = shuffleArray(cards);
+        
+        cards.forEach((card, index) => {
+          const cardElement = document.createElement('div');
+          cardElement.className = 'memory-card';
+          cardElement.dataset.value = card;
+          cardElement.addEventListener('click', flipCard);
+          memoryGame.appendChild(cardElement);
+        });
+        
+        memoryGame.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+        startTimer(30 + (level * 5));
+        
+      } catch (e) {
+        console.error('Error initializing memory game:', e);
+        showToast('Failed to initialize memory game', 'error');
+      }
+    }
+
+    function initMathGame(level) {
+      try {
+        const num1 = Math.floor(Math.random() * (5 + level * 3));
+        const num2 = Math.floor(Math.random() * (5 + level * 3));
+        const correctAnswer = num1 + num2;
+        
+        let options = [correctAnswer];
+        while (options.length < 4) {
+          const randomOption = correctAnswer + Math.floor(Math.random() * 5) - 2;
+          if (randomOption !== correctAnswer && !options.includes(randomOption)) {
+            options.push(randomOption);
+          }
+        }
+        
+        options = shuffleArray(options);
+        
+        document.querySelector('.math-problem').textContent = `${num1} + ${num2} = ?`;
+        const optionElements = document.querySelectorAll('.math-option');
+        optionElements.forEach((option, index) => {
+          option.textContent = options[index];
+          option.onclick = () => checkMathAnswer(option, correctAnswer);
+        });
+        
+        startTimer(15 - level);
+        
+      } catch (e) {
+        console.error('Error initializing math game:', e);
+        showToast('Failed to initialize math game', 'error');
+      }
+    }
+
+    function flipCard() {
+      try {
+        if (this.classList.contains('flipped')) return;
+        
+        this.classList.add('flipped');
+        this.textContent = this.dataset.value;
+        
+        const flippedCards = document.querySelectorAll('.memory-card.flipped:not(.matched)');
+        if (flippedCards.length === 2) {
+          if (flippedCards[0].dataset.value === flippedCards[1].dataset.value) {
+            flippedCards.forEach(card => {
+              card.classList.add('matched');
+            });
+            updateScoreDisplay(10);
+            
+            const allCards = document.querySelectorAll('.memory-card');
+            const matchedCards = document.querySelectorAll('.memory-card.matched');
+            if (allCards.length === matchedCards.length) {
+              endGame(true);
+            }
+          } else {
+            setTimeout(() => {
+              flippedCards.forEach(card => {
+                card.classList.remove('flipped');
+                card.textContent = '';
+              });
+            }, 1000);
+          }
+        }
+      } catch (e) {
+        console.error('Error in flipCard:', e);
+      }
+    }
+
+    function checkMathAnswer(selectedOption, correctAnswer) {
+      try {
+        const selectedValue = parseInt(selectedOption.textContent);
+        if (selectedValue === correctAnswer) {
+          selectedOption.style.backgroundColor = 'var(--success)';
+          selectedOption.style.color = 'white';
+          updateScoreDisplay(10);
+          setTimeout(() => {
+            initMathGame(currentLevel);
+          }, 1000);
+        } else {
+          selectedOption.style.backgroundColor = 'var(--danger)';
+          selectedOption.style.color = 'white';
+          updateScoreDisplay(-5);
+        }
+      } catch (e) {
+        console.error('Error in checkMathAnswer:', e);
+      }
+    }
+
+    function endGame(success) {
+      try {
+        clearInterval(timerInterval);
+        
+        if (success) {
+          const gameIndex = games.findIndex(g => g.id === currentGame);
+          if (gameIndex !== -1) {
+            games[gameIndex].scores.push(gameScore);
+            
+            if (currentLevel === games[gameIndex].currentLevel) {
+              games[gameIndex].currentLevel++;
+              
+              const nextLevelBtn = document.querySelector('.next-level-btn');
+              if (nextLevelBtn) {
+                nextLevelBtn.disabled = false;
+                nextLevelBtn.textContent = 'Next Level';
+              }
+            }
+          }
+          
+          showToast(`Level ${currentLevel} completed! Score: ${gameScore}`);
+        } else {
+          showToast(`Time's up! Your score: ${gameScore}`, 'error');
+        }
+      } catch (e) {
+        console.error('Error in endGame:', e);
+        showToast('Error processing game results', 'error');
+      }
+    }
+
+    function loadGame(gameId, level = 1) {
+      try {
+        if (!currentUser) {
+          showToast('Please sign in to play games', 'error');
+          authModal.classList.add('active');
+          return;
+        }
+        
+        currentGame = parseInt(gameId);
+        currentLevel = level;
+        gameScore = 0;
+        
+        updateScoreDisplay(0);
+        
+        switch (gameId) {
+          case '1': // Memory Matrix
+            initMemoryGame(level);
+            break;
+          case '3': // Math Blitz
+            initMathGame(level);
+            break;
+          // Other games would be initialized here
+          default:
+            throw new Error('Unknown game type');
+        }
+        
+        const modal = document.getElementById(`${games[gameId-1].category}-game-modal`);
+        if (!modal) {
+          throw new Error(`Modal not found for game ${gameId}`);
+        }
+        modal.classList.add('active');
+        
+        levelButtons.forEach(btn => {
+          const btnLevel = parseInt(btn.textContent);
+          btn.classList.toggle('active', btnLevel === level);
+          btn.classList.toggle('locked', btnLevel > games[gameId-1].currentLevel + 1);
+        });
+        
+      } catch (e) {
+        console.error('Error in loadGame:', e);
+        showToast('Failed to load the game', 'error');
+      }
+    }
+
+    // ======================
+    // Auth Functions
+    // ======================
+    function handleAuthStateChanged(user) {
+      if (user) {
+        currentUser = user;
+        authBtn.style.display = 'none';
+        userAvatar.style.display = 'flex';
+        userAvatar.textContent = user.email.charAt(0).toUpperCase();
+        showToast(`Welcome back, ${user.email.split('@')[0]}!`);
+      } else {
+        currentUser = null;
+        authBtn.style.display = 'block';
+        userAvatar.style.display = 'none';
+      }
+    }
+
+    function handleLogin(email, password) {
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          showToast('Logged in successfully');
+          authModal.classList.remove('active');
+        })
+        .catch(error => {
+          console.error('Login error:', error);
+          const errorElement = document.getElementById('login-error');
+          errorElement.textContent = error.message;
+          errorElement.style.display = 'block';
+          showToast('Login failed', 'error');
+        });
+    }
+
+    function handleRegister(name, email, password, confirmPassword) {
+      if (password !== confirmPassword) {
+        const errorElement = document.getElementById('register-error');
+        errorElement.textContent = 'Passwords do not match';
+        errorElement.style.display = 'block';
+        return;
+      }
+      
+      auth.createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          return db.collection('users').doc(userCredential.user.uid).set({
+            name: name,
+            email: email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        })
+        .then(() => {
+          showToast('Account created successfully');
+          authModal.classList.remove('active');
+        })
+        .catch(error => {
+          console.error('Registration error:', error);
+          const errorElement = document.getElementById('register-error');
+          errorElement.textContent = error.message;
+          errorElement.style.display = 'block';
+          showToast('Registration failed', 'error');
+        });
+    }
+
+    function handleGoogleLogin() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(() => {
+          showToast('Google login successful');
+          authModal.classList.remove('active');
+        })
+        .catch(error => {
+          console.error('Google login error:', error);
+          showToast('Google login failed', 'error');
+        });
+    }
+
+    function handleFacebookLogin() {
+      const provider = new firebase.auth.FacebookAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(() => {
+          showToast('Facebook login successful');
+          authModal.classList.remove('active');
+        })
+        .catch(error => {
+          console.error('Facebook login error:', error);
+          showToast('Facebook login failed', 'error');
+        });
+    }
+
+    function handleLogout() {
+      auth.signOut()
+        .then(() => {
+          showToast('Logged out successfully');
+        })
+        .catch(error => {
+          console.error('Logout error:', error);
+          showToast('Logout failed', 'error');
+        });
+    }
+
+    // ======================
+    // Event Listeners
+    // ======================
+    authBtn.addEventListener('click', () => {
+      authModal.classList.add('active');
+    });
+
+    authTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabId = tab.dataset.tab;
+        
+        authTabs.forEach(t => t.classList.remove('active'));
+        authContents.forEach(c => c.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      handleLogin(email, password);
+    });
+
+    registerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('register-name').value;
+      const email = document.getElementById('register-email').value;
+      const password = document.getElementById('register-password').value;
+      const confirm = document.getElementById('register-confirm').value;
+      handleRegister(name, email, password, confirm);
+    });
+
+    googleLoginBtn.addEventListener('click', handleGoogleLogin);
+    facebookLoginBtn.addEventListener('click', handleFacebookLogin);
+
+    userAvatar.addEventListener('click', () => {
+      if (currentUser) {
+        if (confirm('Are you sure you want to logout?')) {
+          handleLogout();
+        }
+      }
+    });
+
+    playButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        loadGame(button.dataset.game);
+      });
+    });
+
+    closeGameButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        gameModals.forEach(modal => modal.classList.remove('active'));
+        clearInterval(timerInterval);
+      });
+    });
+
+    levelButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        if (!button.classList.contains('locked')) {
+          const level = parseInt(button.textContent);
+          loadGame(currentGame, level);
+        }
+      });
+    });
+
+    nextLevelButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        if (!button.disabled) {
+          loadGame(currentGame, currentLevel + 1);
+        }
+      });
+    });
+
+    mobileMenuBtn.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+      mobileMenuBtn.innerHTML = navLinks.classList.contains('active') 
+        ? '<i class="fas fa-times"></i>' 
+        : '<i class="fas fa-bars"></i>';
+    });
+
+    darkModeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      darkModeToggle.innerHTML = document.body.classList.contains('dark-mode') 
+        ? '<i class="fas fa-sun"></i>' 
+        : '<i class="fas fa-moon"></i>';
+    });
+
+    // Close modals when clicking outside
+    window.addEventListener('click', (e) => {
+      if (e.target === authModal) {
+        authModal.classList.remove('active');
+      }
+      
+      gameModals.forEach(modal => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+          clearInterval(timerInterval);
+        }
+      });
+    });
+
+    // Header scroll effect
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        document.getElementById('header').classList.add('scrolled');
+      } else {
+        document.getElementById('header').classList.remove('scrolled');
+      }
+    });
+
+    // ======================
+    // Initialization
+    // ======================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set up auth state observer
+      auth.onAuthStateChanged(handleAuthStateChanged);
+      
+      // Hide loading overlay when everything is ready
+      setTimeout(() => {
+        loadingOverlay.style.opacity = '0';
+        setTimeout(() => {
+          loadingOverlay.style.display = 'none';
+        }, 500);
+      }, 1000);
+      
+      // Initialize games with fade-in animation
+      const fadeElements = document.querySelectorAll('.fade-in');
+      const fadeObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = 1;
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, { threshold: 0.1 });
+
+      fadeElements.forEach(element => {
+        element.style.opacity = 0;
+        element.style.transform = 'translateY(20px)';
+        element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        fadeObserver.observe(element);
+      });
+    });
+  </script>
+</body>
+</html>
